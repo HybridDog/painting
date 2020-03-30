@@ -13,7 +13,7 @@
 
 -- Edited by Jasper den Ouden (a few commits now)
 
-dofile(minetest.get_modpath("painting").."/crafts.lua")
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/crafts.lua")
 
 local hexcols = {
 	white = "ffffff", yellow = "fff000",
