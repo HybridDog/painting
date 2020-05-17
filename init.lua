@@ -176,14 +176,18 @@ minetest.register_entity("painting:picent", {
 	end
 })
 
--- Figure where it hits the canvas, in fraction given position and direction.
-local function figure_paint_pos_raw(pos, d,od, ppos, l)
-	--get player eye level, see player.h line 129
-	local player_eye_h = 1.625
-	ppos.y = ppos.y + player_eye_h
+-- Returns the camera position of the player; it does not include
+-- the client-side offset, e.g. bobbing (see view_bobbing_amount)
+local function get_eye_pos(player)
+	local pos = vector.add(player:getpos(), player:get_eye_offset())
+	pos.y = pos.y + player:get_properties().eye_height
+	return pos
+end
 
+-- Figure where it hits the canvas, in fraction given position and direction.
+local function figure_paint_pos_raw(pos, d,od, eye_pos, l)
 	local normal = { x = d.x, y = 0, z = d.z }
-	local p = intersect(ppos, l, pos, normal)
+	local p = intersect(eye_pos, l, pos, normal)
 
 	local off = -0.5
 	pos = vector.add(pos, {x=off*od.x, y=off, z=off*od.z})
@@ -201,7 +205,7 @@ local dirs = {	-- Directions the painting may be.
 local function figure_paint_pos(self, puncher)
 	local x,y = figure_paint_pos_raw(self.object:getpos(),
 		dirs[self.fd], dirs[(self.fd + 1) % 4],
-		puncher:getpos(), puncher:get_look_dir())
+		get_eye_pos(puncher), puncher:get_look_dir())
 	return math.floor(self.res*clamp(x, 0, 1)), math.floor(self.res*clamp(y, 0, 1))
 end
 
